@@ -1,0 +1,6 @@
+#!C:\Desarrollo\Odoo 19\venv19\Scripts\python.exe
+
+import odoo.cli
+
+if __name__ == "__main__":
+    odoo.cli.main()

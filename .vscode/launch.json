@@ -1,0 +1,26 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Odoo 19 Community",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "odoo",
+            "python": "${workspaceFolder}\\venv19\\Scripts\\python.exe",
+            "cwd": "${workspaceFolder}\\server",
+            "args": [
+                "-c",
+                "${workspaceFolder}\\odoo19.conf",
+                "--db-template=template1",
+                "--database=odoo19_pruebas",
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "subProcess": true,
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}\\server",
+                "PYTHONUNBUFFERED": "1"
+            }
+        }
+    ]
+}
