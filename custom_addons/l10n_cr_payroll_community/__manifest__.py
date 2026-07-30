@@ -1,6 +1,6 @@
 {
     "name": "Costa Rica Payroll - OpenHRMS Community",
-    "version": "19.0.1.0.9",
+    "version": "19.0.1.0.10",
     "category": "Human Resources/Payroll",
     "summary": "Migrates and adapts Costa Rican salary rules to Odoo 19",
     "author": "Custom",
