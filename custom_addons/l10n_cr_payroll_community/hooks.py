@@ -126,10 +126,26 @@ result = (
 
 
 def _condition_type(row):
-    """Input-driven rules can safely compute zero without a Python condition."""
-    if row["Salary Rule Code"] in {"RENQ1", "RENQ2"}:
-        return "python"
-    return "none"
+    return _CONDITIONS.get(row.get("Condition Based on"), "none")
+
+
+def _adapt_condition(row):
+    code = row["Salary Rule Code"]
+    condition = _adapt_python(row.get("Python Condition"), code)
+    input_codes = re.findall(
+        r"\binputs\.([A-Za-z_][A-Za-z0-9_]*)", condition
+    )
+    input_codes = [
+        {"Pension": "CRPENSION", "CRDEUDA": "CROTRASDED"}.get(item, item)
+        for item in input_codes
+    ]
+    if input_codes:
+        checks = [
+            "input_amount(%r) != 0.0" % input_code
+            for input_code in dict.fromkeys(input_codes)
+        ]
+        return "result = %s" % " or ".join(checks)
+    return condition
 
 
 def _get_or_create_category(env, company, name):
@@ -172,7 +188,7 @@ def sync_salary_rules(env):
             "sequence": int(float(row.get("Sequence") or 5)),
             "appears_on_payslip": row.get("Appears on Payslip") == "1",
             "condition_select": _condition_type(row),
-            "condition_python": _adapt_python(row.get("Python Condition"), code),
+            "condition_python": _adapt_condition(row),
             "amount_select": _AMOUNT_TYPES.get(row.get("Amount Type"), "code"),
             "amount_python_compute": _adapt_python(row.get("Python Code"), code),
             "company_id": company.id,

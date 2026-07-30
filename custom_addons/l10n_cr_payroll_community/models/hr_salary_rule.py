@@ -5,18 +5,22 @@ class HrSalaryRule(models.Model):
     _inherit = "hr.salary.rule"
 
     def _satisfy_condition(self, localdict):
-        """Evaluate the two fortnight rules without safe_eval."""
-        self.ensure_one()
-        if self.code not in {"RENQ1", "RENQ2"}:
-            return super()._satisfy_condition(localdict)
+        """Ensure payroll dates exist before evaluating Python conditions."""
+        inputs_wrapper = localdict.get("inputs")
 
-        date_from = localdict.get("date_from")
-        if not date_from:
+        def input_amount(code):
+            input_line = (
+                getattr(inputs_wrapper, "dict", {}).get(code)
+                if inputs_wrapper
+                else False
+            )
+            return input_line.amount if input_line else 0.0
+
+        localdict["input_amount"] = input_amount
+        if not localdict.get("date_from") or not localdict.get("date_to"):
             payslip_wrapper = localdict.get("payslip")
             current_payslip = getattr(payslip_wrapper, "dict", False)
-            date_from = getattr(current_payslip, "date_from", False)
-        if not date_from:
-            return False
-
-        is_first_fortnight = date_from.day == 1
-        return is_first_fortnight if self.code == "RENQ1" else not is_first_fortnight
+            if current_payslip:
+                localdict.setdefault("date_from", current_payslip.date_from)
+                localdict.setdefault("date_to", current_payslip.date_to)
+        return super()._satisfy_condition(localdict)
